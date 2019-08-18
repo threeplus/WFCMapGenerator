@@ -51,19 +51,6 @@ public class WaveFunctionCollapseMgr : MonoBehaviour
         new Position(1,1),*/
     };
 
-    /*
-    int[,] sampleMap = {
-        {6,2,3,0,0,0,1,2,6},
-        {2,3,0,4,4,4,0,1,2},
-        {5,0,1,2,2,2,3,0,5},
-        {0,0,1,2,6,2,3,0,0},
-        {4,0,1,2,2,2,3,0,4},
-        {2,3,0,5,5,5,0,1,2},
-        {6,2,3,0,0,0,1,2,6},
-        {2,3,0,0,0,0,0,1,2},
-        {6,3,0,0,0,0,0,1,6},
-    };*/
-
     int[,] sampleMap = {
         {0,0,0,4,0,0,0,0},
         {0,0,1,2,4,4,0,0},
@@ -404,10 +391,17 @@ public class WaveFunctionCollapseMgr : MonoBehaviour
     public int Width = 5;
     public int Height = 5;
 
+    bool generating = false;
+    public GameObject Error;
+    public GameObject Succeed;
+
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        Retry:
+        generating = true;
+        Error.gameObject.SetActive(false);
+        Succeed.gameObject.SetActive(false);
+
         Instance = this;
 
         int height = Height;
@@ -422,12 +416,15 @@ public class WaveFunctionCollapseMgr : MonoBehaviour
         int[,] map = model.result;
 
         string output = "";        
+        bool success = true;
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 output += map[y,x] + " ";
+                if (map[y,x] == -1)
+                    success = false;
                 /*if (map[y,x] < 0){
                     Debug.Log("Failed");
                     yield return new WaitForSeconds(TimeWait*2);
@@ -438,6 +435,11 @@ public class WaveFunctionCollapseMgr : MonoBehaviour
         }
 
         Debug.Log(output);
+
+        Error.gameObject.SetActive(!success);
+        Succeed.gameObject.SetActive(success);
+
+        generating = false;
     }
 
 
@@ -468,7 +470,7 @@ public class WaveFunctionCollapseMgr : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!generating && Input.GetMouseButtonDown(0))
         {
             StartCoroutine(Start());
         }
